@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebula Strike - Space Shooter Arcade Game Documentation</title>
+    <meta name="description" content="Technical documentation and guide for Nebula Strike, a retro-modern Android arcade space shooter built with Jetpack Compose.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Orbitron:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0b14;
+            --card-bg: #131324;
+            --card-border: #1e1e38;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #a855f7;
+            --accent-pink: #ec4899;
+            --accent-green: #10b981;
+            --font-main: 'Inter', sans-serif;
+            --font-accent: 'Orbitron', sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(168, 85, 247, 0.1) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        header {
+            position: relative;
+            padding: 4rem 2rem;
+            text-align: center;
+            border-bottom: 1px solid var(--card-border);
+            background: linear-gradient(180deg, rgba(19, 19, 36, 0.8) 0%, rgba(11, 11, 20, 0) 100%);
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent-purple), transparent);
+            box-shadow: 0 0 20px var(--accent-cyan);
+        }
+
+        .header-title {
+            font-family: var(--font-accent);
+            font-size: 3rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #fff 30%, var(--accent-cyan) 70%, var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
+            display: inline-block;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 3rem;
+        }
+
+        /* Sidebar Navigation */
+        aside {
+            position: sticky;
+            top: 2rem;
+            height: fit-content;
+        }
+
+        .nav-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav-title {
+            font-family: var(--font-accent);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent-cyan);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .nav-list {
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 0.5rem;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.75rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-link::before {
+            content: '⊳';
+            margin-right: 8px;
+            font-size: 0.75rem;
+            opacity: 0.5;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.03);
+            border-left: 3px solid var(--accent-cyan);
+            padding-left: 1rem;
+        }
+
+        .nav-link:hover::before, .nav-link.active::before {
+            color: var(--accent-cyan);
+            opacity: 1;
+            transform: translateX(2px);
+        }
+
+        /* Main Content */
+        main {
+            min-width: 0; /* Prevents flex/grid blowouts */
+        }
+
+        section {
+            margin-bottom: 4rem;
+            scroll-margin-top: 2rem;
+        }
+
+        .section-title {
+            font-family: var(--font-accent);
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::after {
+            content: '';
+            flex-grow: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--card-border), transparent);
+        }
+
+        .section-title span {
+            color: var(--accent-cyan);
+        }
+
+        p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+            font-weight: 300;
+        }
+
+        /* Feature Cards Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 1.75rem;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--accent-purple);
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(168, 85, 247, 0.3);
+            box-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.2);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .feature-title {
+            font-family: var(--font-accent);
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        .feature-desc {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+        }
+
+        /* Architecture Section */
+        .arch-diagram {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 2rem 0;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .arch-node {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px dashed var(--card-border);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: var(--transition);
+        }
+
+        .arch-node:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(6, 182, 212, 0.02);
+        }
+
+        .arch-label {
+            font-family: var(--font-accent);
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--accent-cyan);
+        }
+
+        .arch-details {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: right;
+        }
+
+        /* Code Block Style */
+        pre {
+            background: #07070d;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 1.25rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+        }
+
+        code {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: #e2e8f0;
+        }
+
+        .keyword { color: var(--accent-pink); }
+        .type { color: var(--accent-cyan); }
+        .comment { color: #64748b; font-style: italic; }
+
+        /* Game Elements Showcase */
+        .showcase-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .showcase-table th, .showcase-table td {
+            padding: 1rem 1.5rem;
+            text-align: left;
+        }
+
+        .showcase-table th {
+            background: rgba(255, 255, 255, 0.02);
+            font-family: var(--font-accent);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent-cyan);
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .showcase-table td {
+            border-bottom: 1px solid rgba(30, 30, 56, 0.5);
+            font-size: 0.95rem;
+        }
+
+        .showcase-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge-cyan { background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); }
+        .badge-purple { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+        .badge-pink { background: rgba(236, 72, 153, 0.15); color: var(--accent-pink); }
+        .badge-green { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+
+        footer {
+            text-align: center;
+            padding: 3rem 2rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            border-top: 1px solid var(--card-border);
+            background: rgba(19, 19, 36, 0.3);
+        }
+
+        footer a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        footer a:hover {
+            color: var(--accent-purple);
+            text-decoration: underline;
+        }
+
+        /* Responsive */
+        @media (max-width: 900px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            aside {
+                position: static;
+            }
+
+            .header-title {
+                font-size: 2.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-title">Nebula Strike</div>
+        <div class="header-subtitle">Retro-Modern Space Shooter Arcade Game Built with Jetpack Compose & Kotlin</div>
+    </header>
+
+    <div class="container">
+        <aside>
+            <div class="nav-card">
+                <div class="nav-title">Documentation</div>
+                <ul class="nav-list">
+                    <li class="nav-item"><a href="#overview" class="nav-link active">Overview</a></li>
+                    <li class="nav-item"><a href="#key-features" class="nav-link">Key Features</a></li>
+                    <li class="nav-item"><a href="#architecture" class="nav-link">Architecture</a></li>
+                    <li class="nav-item"><a href="#entities" class="nav-link">Game Entities</a></li>
+                    <li class="nav-item"><a href="#development" class="nav-link">Development</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <main>
+            <section id="overview">
+                <h2 class="section-title">Project <span>Overview</span></h2>
+                <p>
+                    <strong>Nebula Strike</strong> is an action-packed, side-scrolling arcade space shooter designed for Android. 
+                    Built from the ground up using Jetpack Compose, the game features smooth graphics, real-time collision detection, 
+                    dynamic wave generation, immersive audio effects, settings configuration, and local high score tracking.
+                </p>
+                <p>
+                    By utilizing modern Android components, Nebula Strike combines the nostalgic charm of retro arcade classics with 
+                    clean, state-of-the-art programming paradigms, offering developers a solid reference for implementing custom Canvas-based 
+                    games in Compose.
+                </p>
+            </section>
+
+            <section id="key-features">
+                <h2 class="section-title">Key <span>Features</span></h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <span class="feature-icon">🚀</span>
+                        <h3 class="feature-title">Fluid Controls</h3>
+                        <p class="feature-desc">Responsive drag and touch gestures for smooth starship maneuvers in intense combat situations.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">👾</span>
+                        <h3 class="feature-title">Diverse Enemies</h3>
+                        <p class="feature-desc">Multiple enemy types with distinct movement patterns, firing behaviors, and challenging boss fights.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">✨</span>
+                        <h3 class="feature-title">FX Particle System</h3>
+                        <p class="feature-desc">Visual impacts, thruster flares, and exploding starships simulated through dynamic canvas-rendered particles.</p>
+                    </div>
+                    <div class="feature-card">
+                        <span class="feature-icon">🔊</span>
+                        <h3 class="feature-title">Retro Soundscape</h3>
+                        <p class="feature-desc">Multi-channel SoundManager for ambient music, laser discharges, power-ups, and explosions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="architecture">
+                <h2 class="section-title">Architecture <span>& Design</span></h2>
+                <p>
+                    The project implements a decoupled Model-View-Controller design pattern suitable for interactive loop-driven frameworks.
+                </p>
+                <div class="arch-diagram">
+                    <div class="arch-node">
+                        <span class="arch-label">GameEngine.kt</span>
+                        <span class="arch-details">Coroutines-based game loop, state transitions, physics updates</span>
+                    </div>
+                    <div class="arch-node">
+                        <span class="arch-label">GameCanvas.kt</span>
+                        <span class="arch-details">Compose DrawScope rendering player, lasers, enemies, explosions</span>
+                    </div>
+                    <div class="arch-node">
+                        <span class="arch-label">Entities.kt</span>
+                        <span class="arch-details">Data structures for Player, Enemy, Laser, PowerUp, Particle</span>
+                    </div>
+                    <div class="arch-node">
+                        <span class="arch-label">SoundManager.kt</span>
+                        <span class="arch-details">Audio playback pooling using SoundPool & MediaPlayer APIs</span>
+                    </div>
+                </div>
+                <p>
+                    The loop runs inside a Kotlin Coroutine synced to standard 60 FPS tick rates, computing physics offsets, boundaries, 
+                    collision interactions, and score adjustments before notifying the drawing layer:
+                </p>
+                <pre><code><span class="comment">// Standard update cycle in GameEngine.kt</span>
+<span class="keyword">fun</span> <span class="type">updateGame</span>(deltaTime: <span class="type">Float</span>) {
+    updatePlayer(deltaTime)
+    updateLasers(deltaTime)
+    updateEnemies(deltaTime)
+    checkCollisions()
+    cleanupEntities()
+}</code></pre>
+            </section>
+
+            <section id="entities">
+                <h2 class="section-title">Game <span>Entities</span></h2>
+                <p>
+                    All entities inherit position vectors and bounding boxes used by the engine to compute game actions:
+                </p>
+                <table class="showcase-table">
+                    <thead>
+                        <tr>
+                            <th>Entity Type</th>
+                            <th>Description</th>
+                            <th>Status Badge</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Player Starship</strong></td>
+                            <td>Customized layout, upgradable weapons, health and shield metrics.</td>
+                            <td><span class="badge badge-cyan">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Scout / Fighter Enemies</strong></td>
+                            <td>Zig-zag movements, target-seeking lasers, random spawning rates.</td>
+                            <td><span class="badge badge-purple">Active</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Power-Ups</strong></td>
+                            <td>Shield restore, attack speed boost, weapon upgrades.</td>
+                            <td><span class="badge badge-green">Buff</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Mothership Boss</strong></td>
+                            <td>High-health boss with multiple phase attacks and laser sweeps.</td>
+                            <td><span class="badge badge-pink">Boss</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section id="development">
+                <h2 class="section-title">Development <span>Setup</span></h2>
+                <p>
+                    Nebula Strike requires Android Studio Koala+ and Kotlin 2.0. To compile and run this app locally:
+                </p>
+                <pre><code><span class="comment"># Clone the repository</span>
+git clone https://github.com/stevenkmlmobile/Vibe_Coding_Project_from_6June2026.git
+
+<span class="comment"># Open in Android Studio and run build tasks</span>
+./gradlew assembleDebug</code></pre>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Nebula Strike Docs. Created for the Vibe Coding Project. Back to <a href="https://github.com/stevenkmlmobile/Vibe_Coding_Project_from_6June2026">GitHub Repository</a></p>
+    </footer>
+
+    <script>
+        // Simple navigation highlight sync
+        const sections = document.querySelectorAll('section');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (pageYOffset >= sectionTop - 150) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href').slice(1) === current) {
+                    link.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
